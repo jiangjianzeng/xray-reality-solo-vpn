@@ -96,11 +96,11 @@ update flow is:
 
 ```bash
 git pull
-systemctl restart xray-reality-solo-vpn
+sudo ./scripts/update.sh
 ```
 
-If the update also changes Xray runtime behavior or deployment templates,
-restart the related services as needed after the manager restart.
+`scripts/update.sh` publishes a new release under `/opt/xray-reality-solo-vpn/releases/<timestamp>/`,
+updates the `current` symlink, and restarts `xray-reality-solo-vpn`.
 
 ## Host Services
 

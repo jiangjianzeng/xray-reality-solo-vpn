@@ -91,10 +91,11 @@
 
 ```bash
 git pull
-systemctl restart xray-reality-solo-vpn
+sudo ./scripts/update.sh
 ```
 
-今回の更新に Xray ランタイム挙動やデプロイテンプレートの変更が含まれる場合は、manager 再起動後に必要な関連サービスも再起動してください。
+`scripts/update.sh` は `/opt/xray-reality-solo-vpn/releases/<timestamp>/` に新しい release を発行し、
+`current` シンボリックリンクを更新して `xray-reality-solo-vpn` を再起動します。
 
 ## ホストサービス
 

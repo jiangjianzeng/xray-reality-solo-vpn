@@ -153,6 +153,34 @@ translate() {
     zh:install_finish_note) printf '请核对生成的一次性 setup 链接，并仅为预期的管理员账号执行初始化。' ;;
     ja:install_finish_note) printf '生成されたワンタイム setup リンクを確認し、想定した管理者アカウントに対してのみ初期化を行ってください。' ;;
 
+    en:update_intro_title) printf 'Solo VPN host updater' ;;
+    zh:update_intro_title) printf 'Solo VPN 宿主机更新脚本' ;;
+    ja:update_intro_title) printf 'Solo VPN ホスト更新スクリプト' ;;
+
+    en:update_intro_body) printf 'This updater publishes a new release from the current repository checkout and switches the live current symlink.' ;;
+    zh:update_intro_body) printf '该更新脚本会基于当前仓库内容发布新的 release，并切换线上 current 软链接。' ;;
+    ja:update_intro_body) printf 'この更新スクリプトは、現在のリポジトリ内容から新しい release を発行し、稼働中の current シンボリックリンクを切り替えます。' ;;
+
+    en:update_intro_notice) printf 'Run this on the target host after git pull, using a checkout that already contains build/manager-linux-amd64 and web/dist.' ;;
+    zh:update_intro_notice) printf '请在目标服务器执行 git pull 后运行，并确保当前仓库已包含 build/manager-linux-amd64 与 web/dist。' ;;
+    ja:update_intro_notice) printf '対象ホストで git pull 後に実行し、現在のリポジトリに build/manager-linux-amd64 と web/dist が含まれていることを確認してください。' ;;
+
+    en:update_root_required) printf 'This script must be run as root (or via sudo).' ;;
+    zh:update_root_required) printf '该脚本必须以 root 身份运行（或通过 sudo 执行）。' ;;
+    ja:update_root_required) printf 'このスクリプトは root 権限（または sudo）で実行する必要があります。' ;;
+
+    en:update_release_note) printf 'Published release directory' ;;
+    zh:update_release_note) printf '已发布 release 目录' ;;
+    ja:update_release_note) printf '発行済み release ディレクトリ' ;;
+
+    en:update_current_note) printf 'Current symlink now points to' ;;
+    zh:update_current_note) printf '当前 current 软链接已指向' ;;
+    ja:update_current_note) printf 'current シンボリックリンクの新しい参照先' ;;
+
+    en:update_restart_note) printf 'Restarted service' ;;
+    zh:update_restart_note) printf '已重启服务' ;;
+    ja:update_restart_note) printf '再起動したサービス' ;;
+
     en:check_blocked_path) printf 'Found old residue path: %s' "$2" ;;
     zh:check_blocked_path) printf '发现旧残留路径: %s' "$2" ;;
     ja:check_blocked_path) printf '古い残留パスが見つかりました: %s' "$2" ;;

@@ -93,10 +93,11 @@
 
 ```bash
 git pull
-systemctl restart xray-reality-solo-vpn
+sudo ./scripts/update.sh
 ```
 
-如果这次更新还涉及 Xray 运行时行为或部署模板变化，请在重启 manager 之后按需重启相关服务。
+`scripts/update.sh` 会把当前仓库内容发布到 `/opt/xray-reality-solo-vpn/releases/<timestamp>/`，
+更新 `current` 软链接，并重启 `xray-reality-solo-vpn`。
 
 ## 宿主机服务
 

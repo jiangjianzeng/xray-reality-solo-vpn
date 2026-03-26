@@ -9,6 +9,7 @@
 - `cd web && npx tsc --noEmit && npm run build`: typecheck and build the frontend.
 - `./scripts/bootstrap-reality-env.sh`: generate `XRAY_PRIVATE_KEY`, `XRAY_PUBLIC_KEY`, and `SESSION_SECRET`.
 - `./scripts/check.sh && ./scripts/install.sh`: validate and install the host-level deployment.
+- `git pull && sudo ./scripts/update.sh`: publish a new release from the current checkout and restart the manager on an existing host install.
 
 ## Deployment Artifact Requirement
 Deployment uploads must include both prebuilt artifacts:
