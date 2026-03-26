@@ -70,7 +70,7 @@ func Load() (*Config, error) {
 		AccessTokenTTL:       7 * 24 * time.Hour,
 		RateLimitWindow:      15 * time.Minute,
 		MaxRequestBodyBytes:  16 * 1024,
-		RuntimeRefreshPeriod: 15 * time.Second,
+		RuntimeRefreshPeriod: time.Duration(intFromEnv("RUNTIME_REFRESH_SECONDS", 5)) * time.Second,
 		SetupTicketTTL:       time.Duration(intFromEnv("SETUP_TTL_MINUTES", 30)) * time.Minute,
 	}
 

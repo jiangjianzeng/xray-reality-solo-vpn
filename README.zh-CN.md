@@ -56,6 +56,8 @@
 - `data/manager.db`
   SQLite 数据库
 
+`RUNTIME_REFRESH_SECONDS` 用于控制后端轮询节奏和前端自动刷新间隔，默认值为 `5` 秒。
+
 ## 宿主机安装
 
 在目标 Ubuntu VPS 上执行：

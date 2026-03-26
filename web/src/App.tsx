@@ -397,6 +397,7 @@ function App() {
   const initialized = setupQuery.data?.initialized;
   const authenticated = sessionQuery.data?.authenticated;
   const setupAuthorized = setupQuery.data?.setupAuthorized;
+  const refreshIntervalMs = Math.max(1000, setupQuery.data?.refreshIntervalMs ?? 5000);
 
   useEffect(() => {
     window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
@@ -426,6 +427,7 @@ function App() {
         <DashboardView
           language={language}
           onLanguageChange={setLanguage}
+          refreshIntervalMs={refreshIntervalMs}
           setupStatus={setupQuery.data!}
           username={sessionQuery.data?.admin?.username ?? "admin"}
           disabled={isPending}
@@ -632,6 +634,7 @@ function Field({
 type DashboardProps = {
   language: Language;
   onLanguageChange: (language: Language) => void;
+  refreshIntervalMs: number;
   setupStatus: SetupStatus;
   username: string;
   disabled: boolean;
@@ -642,6 +645,7 @@ type DashboardProps = {
 function DashboardView({
   language,
   onLanguageChange,
+  refreshIntervalMs,
   setupStatus,
   username,
   disabled,
@@ -651,7 +655,9 @@ function DashboardView({
   const queryClient = useQueryClient();
   const t = text[language];
   const passwordPanelRef = useRef<HTMLDivElement | null>(null);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const [showPasswordPanel, setShowPasswordPanel] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const clientForm = useForm<z.infer<typeof clientSchema>>({
     resolver: zodResolver(clientSchema),
     defaultValues: { name: "" }
@@ -668,13 +674,13 @@ function DashboardView({
   const dashboardQuery = useQuery({
     queryKey: ["dashboard"],
     queryFn: api.dashboard,
-    refetchInterval: 15000
+    refetchInterval: refreshIntervalMs
   });
 
   const clientsQuery = useQuery({
     queryKey: ["clients"],
     queryFn: api.clients,
-    refetchInterval: 15000
+    refetchInterval: refreshIntervalMs
   });
 
   const logoutMutation = useMutation({
@@ -751,6 +757,7 @@ function DashboardView({
     lineServerAddress: setupStatus.lineServerAddress,
     xrayTarget: setupStatus.xrayTarget,
     serviceState: setupStatus.serviceState,
+    refreshIntervalMs,
     clientCount: setupStatus.clientCount,
     activeClientCount: setupStatus.activeClientCount
   };
@@ -759,10 +766,26 @@ function DashboardView({
 
   function openPasswordPanel() {
     setShowPasswordPanel(true);
+    setAccountMenuOpen(false);
     requestAnimationFrame(() => {
       passwordPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    }
+
+    if (!accountMenuOpen) {
+      return;
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [accountMenuOpen]);
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 px-3 py-4 sm:px-5 sm:py-6">
@@ -797,12 +820,18 @@ function DashboardView({
               )}
               {t.dashboard.syncXray}
             </Button>
-            <div className="group relative">
-              <Button variant="ghost" className="gap-2" disabled={disabled}>
+            <div ref={accountMenuRef} className="relative">
+              <Button
+                variant="ghost"
+                className="gap-2"
+                disabled={disabled}
+                onClick={() => setAccountMenuOpen((open) => !open)}
+              >
                 {username}
-                <ChevronDown className="size-4" />
+                <ChevronDown className={cn("size-4 transition-transform", accountMenuOpen ? "rotate-180" : "")} />
               </Button>
-              <div className="invisible absolute right-0 top-full z-20 mt-2 min-w-40 rounded-xl border border-border/70 bg-card/95 p-1 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+              {accountMenuOpen ? (
+              <div className="absolute right-0 top-[calc(100%+0.6rem)] z-50 min-w-44 rounded-xl border border-border/80 bg-card/95 p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.12)] backdrop-blur">
                 <button
                   type="button"
                   className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
@@ -814,13 +843,17 @@ function DashboardView({
                 <button
                   type="button"
                   className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
-                  onClick={() => logoutMutation.mutate()}
+                  onClick={() => {
+                    setAccountMenuOpen(false);
+                    logoutMutation.mutate();
+                  }}
                   disabled={logoutMutation.isPending || disabled}
                 >
                   <LogOut className="mr-2 size-4" />
                   {t.dashboard.logout}
                 </button>
               </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -999,51 +1032,81 @@ function ClientRow({
   }
 
   return (
-    <article className="rounded-xl border border-border/70 bg-background/80 p-3">
+    <article className="rounded-2xl border border-border/70 bg-background/80 p-4 shadow-[0_1px_0_rgba(15,23,42,0.02)]">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="text-sm font-semibold">{client.name}</p>
-          <p className="font-mono text-xs text-muted-foreground">{client.slug}</p>
+          <p className="text-base font-semibold tracking-tight">{client.name}</p>
+          <p className="mt-0.5 font-mono text-xs text-muted-foreground">{client.slug}</p>
         </div>
-        <Badge tone={client.enabled ? "success" : "warn"}>{client.enabled ? t.client.enabled : t.client.disabled}</Badge>
+        <Badge tone={client.enabled ? "success" : "warn"} className="px-2 py-0 text-[11px] tracking-[0.08em]">
+          {client.enabled ? t.client.enabled : t.client.disabled}
+        </Badge>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground sm:grid-cols-3 xl:grid-cols-5">
-        <p>{t.client.rx}: {client.rxHuman}</p>
-        <p>{t.client.tx}: {client.txHuman}</p>
-        <p>{t.client.downRate}: {client.rxBpsHuman}</p>
-        <p>{t.client.upRate}: {client.txBpsHuman}</p>
-        <p>{t.client.lastSeen}: {formatLastSeen(client.last_seen_at, language)}</p>
-      </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-muted-foreground xl:grid-cols-3">
+          <div>
+            <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground/80">{t.client.rx}</dt>
+            <dd className="mt-1 text-base text-foreground/80">{client.rxHuman}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground/80">{t.client.tx}</dt>
+            <dd className="mt-1 text-base text-foreground/80">{client.txHuman}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground/80">{t.client.downRate}</dt>
+            <dd className="mt-1 text-base text-foreground/80">{client.rxBpsHuman}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground/80">{t.client.upRate}</dt>
+            <dd className="mt-1 text-base text-foreground/80">{client.txBpsHuman}</dd>
+          </div>
+          <div className="col-span-2 xl:col-span-2">
+            <dt className="text-xs uppercase tracking-[0.08em] text-muted-foreground/80">{t.client.lastSeen}</dt>
+            <dd className="mt-1 whitespace-nowrap text-base text-foreground/80">{formatLastSeen(client.last_seen_at, language)}</dd>
+          </div>
+        </dl>
 
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="secondary" disabled={busy} onClick={() => copyText(client.shareLink, t.notices.copiedVless)}>
-            <Copy className="mr-1 size-3.5" />
-            VLESS
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={busy}
-            onClick={() => copyText(client.mihomoSubscriptionUrl, t.notices.copiedSubscription)}
-          >
-            <Copy className="mr-1 size-3.5" />
-            {t.client.clash}
-          </Button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="ghost" disabled={busy} onClick={() => onRotate()}>
-            <RefreshCw className="mr-1 size-3.5" />
-            {t.client.resetToken}
-          </Button>
+        <div className="flex items-center justify-end lg:pb-0.5">
           <Button size="sm" variant="ghost" disabled={busy} onClick={() => onToggle(!client.enabled)}>
             {client.enabled ? t.client.disable : t.client.enable}
           </Button>
-          <Button size="sm" variant="danger" disabled={busy} onClick={() => onDelete()}>
-            <Trash2 className="mr-1 size-3.5" />
-            {t.client.remove}
-          </Button>
+        </div>
+      </div>
+
+      <div className="mt-4 border-t border-border/60 pt-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="secondary" disabled={busy} onClick={() => copyText(client.shareLink, t.notices.copiedVless)}>
+              <Copy className="mr-1 size-3.5" />
+              VLESS
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={busy}
+              onClick={() => copyText(client.mihomoSubscriptionUrl, t.notices.copiedSubscription)}
+            >
+              <Copy className="mr-1 size-3.5" />
+              {t.client.clash}
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="ghost" disabled={busy} onClick={() => onRotate()}>
+              <RefreshCw className="mr-1 size-3.5" />
+              {t.client.resetToken}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-danger hover:bg-danger/10 hover:text-danger"
+              disabled={busy}
+              onClick={() => onDelete()}
+            >
+              <Trash2 className="mr-1 size-3.5" />
+              {t.client.remove}
+            </Button>
+          </div>
         </div>
       </div>
     </article>

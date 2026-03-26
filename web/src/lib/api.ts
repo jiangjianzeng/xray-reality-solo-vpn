@@ -12,6 +12,7 @@ export type SetupStatus = {
   serviceState: string;
   totalRxHuman: string;
   totalTxHuman: string;
+  refreshIntervalMs: number;
   clientCount: number;
   activeClientCount: number;
 };
@@ -32,6 +33,7 @@ export type DashboardResponse = {
     lineServerAddress: string;
     xrayTarget: string;
     serviceState: string;
+    refreshIntervalMs: number;
     clientCount: number;
     activeClientCount: number;
   };

@@ -54,6 +54,8 @@
 - `data/manager.db`
   SQLite データベース
 
+`RUNTIME_REFRESH_SECONDS` はバックエンドのポーリング周期とフロントエンドの自動更新間隔を制御します。既定値は `5` 秒です。
+
 ## ホストインストール
 
 対象の Ubuntu VPS で実行します:

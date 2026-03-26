@@ -686,6 +686,7 @@ func (a *App) runtimeSummary(ctx context.Context) (map[string]any, error) {
 		"totalTxBytes":      metrics.TotalTXBytes,
 		"totalRxHuman":      runtime.BytesToHuman(metrics.TotalRXBytes),
 		"totalTxHuman":      runtime.BytesToHuman(metrics.TotalTXBytes),
+		"refreshIntervalMs": int(a.cfg.RuntimeRefreshPeriod / time.Millisecond),
 		"clientCount":       len(clients),
 		"activeClientCount": active,
 	}, nil

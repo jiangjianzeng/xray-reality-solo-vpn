@@ -58,6 +58,8 @@ This project is not a multi-node control plane, not a public shared-access platf
 - `data/manager.db`
   SQLite database
 
+`RUNTIME_REFRESH_SECONDS` controls the backend polling cadence and the frontend auto-refresh interval. The default is `5` seconds.
+
 ## Host Install
 
 Run on the target Ubuntu VPS:
