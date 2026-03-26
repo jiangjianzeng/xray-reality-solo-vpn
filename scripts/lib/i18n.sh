@@ -81,6 +81,34 @@ translate() {
     zh:install_setup_ttl) printf '请输入一次性 setup 链接有效期（分钟）' ;;
     ja:install_setup_ttl) printf 'ワンタイム setup リンクの有効期限（分）を入力してください' ;;
 
+    en:install_invalid_control_chars) printf 'Invalid input: control characters or terminal escape sequences are not allowed.' ;;
+    zh:install_invalid_control_chars) printf '输入无效：不允许控制字符或终端转义序列。' ;;
+    ja:install_invalid_control_chars) printf '入力が無効です。制御文字や端末のエスケープシーケンスは使用できません。' ;;
+
+    en:install_invalid_panel_domain) printf 'Invalid panel domain. Enter a hostname such as panel.example.com.' ;;
+    zh:install_invalid_panel_domain) printf '面板域名格式无效，请输入类似 panel.example.com 的主机名。' ;;
+    ja:install_invalid_panel_domain) printf 'パネル用ドメインの形式が正しくありません。panel.example.com のようなホスト名を入力してください。' ;;
+
+    en:install_invalid_line_domain) printf 'Invalid line domain. Enter a hostname such as line.example.com.' ;;
+    zh:install_invalid_line_domain) printf '线路域名格式无效，请输入类似 line.example.com 的主机名。' ;;
+    ja:install_invalid_line_domain) printf '回線用ドメインの形式が正しくありません。line.example.com のようなホスト名を入力してください。' ;;
+
+    en:install_invalid_line_server_address) printf 'Invalid connection address. Enter a hostname or IPv4 address.' ;;
+    zh:install_invalid_line_server_address) printf '连接地址格式无效，请输入主机名或 IPv4 地址。' ;;
+    ja:install_invalid_line_server_address) printf '接続先の形式が正しくありません。ホスト名または IPv4 アドレスを入力してください。' ;;
+
+    en:install_invalid_reality_target) printf 'Invalid REALITY target. Use host:port, for example www.cloudflare.com:443.' ;;
+    zh:install_invalid_reality_target) printf 'REALITY 目标格式无效，请使用 host:port，例如 www.cloudflare.com:443。' ;;
+    ja:install_invalid_reality_target) printf 'REALITY ターゲットの形式が正しくありません。www.cloudflare.com:443 のように host:port 形式で入力してください。' ;;
+
+    en:install_invalid_acme_email) printf 'Invalid email address format.' ;;
+    zh:install_invalid_acme_email) printf '邮箱格式无效。' ;;
+    ja:install_invalid_acme_email) printf 'メールアドレスの形式が正しくありません。' ;;
+
+    en:install_invalid_setup_ttl) printf 'Invalid setup TTL. Enter an integer between 1 and 1440.' ;;
+    zh:install_invalid_setup_ttl) printf 'setup 链接有效期格式无效，请输入 1 到 1440 之间的整数。' ;;
+    ja:install_invalid_setup_ttl) printf 'setup リンク有効期限の形式が正しくありません。1 から 1440 の整数を入力してください。' ;;
+
     en:install_missing_manager) printf 'Missing required artifact: build/manager-linux-amd64' ;;
     zh:install_missing_manager) printf '缺少必需产物：build/manager-linux-amd64' ;;
     ja:install_missing_manager) printf '必須成果物がありません: build/manager-linux-amd64' ;;

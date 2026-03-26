@@ -4,6 +4,13 @@
 
 `xray-reality-solo-vpn` は、個人運用向けの単一 VPS 用セルフホスト型セキュアアクセス管理パネルです。パネル内の製品名として `Solo VPN` を使います。
 
+## 上流リファレンス
+
+- Xray-core 上流リポジトリ: <https://github.com/XTLS/Xray-core>
+- REALITY 上流リポジトリ: <https://github.com/XTLS/REALITY>
+
+このプロジェクトは `Xray-core + VLESS + REALITY` を前提に構築されていますが、上流リポジトリのミラーでも公式 XTLS プロジェクトでもありません。プロトコル挙動、各種パラメータの意味、互換性の判断は上流リポジトリを参照してください。
+
 ## プロダクト範囲
 
 - 単一マシン構成

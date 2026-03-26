@@ -25,15 +25,107 @@ prompt_required() {
   local prompt="$2"
   local default="${3:-}"
   local value=""
-  while [[ -z "$value" ]]; do
+  while true; do
     if [[ -n "$default" ]]; then
       read -r -p "${prompt} [${default}]: " value
       value="${value:-$default}"
     else
       read -r -p "${prompt}: " value
     fi
+    if [[ -z "$value" ]]; then
+      continue
+    fi
+    if validate_input "$key" "$value"; then
+      break
+    fi
   done
   printf '%s' "$value"
+}
+
+is_ipv4() {
+  local input="$1"
+  local part
+  [[ "$input" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || return 1
+  IFS='.' read -r -a parts <<<"$input"
+  for part in "${parts[@]}"; do
+    (( part >= 0 && part <= 255 )) || return 1
+  done
+}
+
+is_hostname() {
+  local input="$1"
+  [[ "$input" =~ ^[A-Za-z0-9.-]+$ ]] || return 1
+  [[ "$input" != .* && "$input" != *. && "$input" != *..* ]] || return 1
+  [[ "$input" =~ [A-Za-z0-9] ]] || return 1
+}
+
+validate_input() {
+  local key="$1"
+  local value="$2"
+  local host=""
+  local port=""
+
+  if printf '%s' "$value" | LC_ALL=C grep -q '[[:cntrl:]]'; then
+    echo "$(translate install_invalid_control_chars)"
+    return 1
+  fi
+
+  case "$key" in
+    PANEL_DOMAIN)
+      if is_hostname "$value"; then
+        return 0
+      fi
+      echo "$(translate install_invalid_panel_domain)"
+      return 1
+      ;;
+    LINE_DOMAIN)
+      if is_hostname "$value"; then
+        return 0
+      fi
+      echo "$(translate install_invalid_line_domain)"
+      return 1
+      ;;
+    LINE_SERVER_ADDRESS)
+      if is_hostname "$value" || is_ipv4 "$value"; then
+        return 0
+      fi
+      echo "$(translate install_invalid_line_server_address)"
+      return 1
+      ;;
+    XRAY_REALITY_TARGET)
+      host="${value%:*}"
+      port="${value##*:}"
+      if [[ -z "$host" || -z "$port" || "$host" == "$value" ]]; then
+        echo "$(translate install_invalid_reality_target)"
+        return 1
+      fi
+      if ! [[ "$port" =~ ^[0-9]+$ ]] || (( port < 1 || port > 65535 )); then
+        echo "$(translate install_invalid_reality_target)"
+        return 1
+      fi
+      if is_hostname "$host" || is_ipv4 "$host"; then
+        return 0
+      fi
+      echo "$(translate install_invalid_reality_target)"
+      return 1
+      ;;
+    ACME_EMAIL)
+      if [[ "$value" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]]; then
+        return 0
+      fi
+      echo "$(translate install_invalid_acme_email)"
+      return 1
+      ;;
+    SETUP_TTL_MINUTES)
+      if [[ "$value" =~ ^[0-9]+$ ]] && (( value >= 1 && value <= 1440 )); then
+        return 0
+      fi
+      echo "$(translate install_invalid_setup_ttl)"
+      return 1
+      ;;
+  esac
+
+  return 0
 }
 
 detect_public_ip() {

@@ -4,6 +4,16 @@ English | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md)
 
 `xray-reality-solo-vpn` is a self-hosted secure access manager and control panel for a single VPS. `Solo VPN` is used as the UI/product name inside the panel.
 
+## Upstream References
+
+- Xray-core upstream repository: <https://github.com/XTLS/Xray-core>
+- REALITY upstream repository: <https://github.com/XTLS/REALITY>
+
+This project builds on `Xray-core + VLESS + REALITY`, but it is not a mirror of
+those upstream repositories and it is not an official XTLS project. Refer to
+the upstream repositories for protocol behavior, parameter semantics, and
+compatibility details.
+
 ## Product Scope
 
 - Single-machine deployment

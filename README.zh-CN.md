@@ -4,6 +4,13 @@
 
 `xray-reality-solo-vpn` 是一个面向个人自建场景的单机安全接入与管理面板，`Solo VPN` 作为面板内的产品名使用。它服务的不是“多节点平台”场景，而是更真实的使用方式：一台 VPS、一个管理员、少量设备、一个稳定可控的自建接入环境。
 
+## 上游参考
+
+- Xray-core 上游仓库：<https://github.com/XTLS/Xray-core>
+- REALITY 上游仓库：<https://github.com/XTLS/REALITY>
+
+本项目基于 `Xray-core + VLESS + REALITY` 的能力构建，但并不是这些上游仓库的镜像，也不是 XTLS 官方项目。协议行为、参数含义与兼容性细节请以上游仓库为准。
+
 ## 产品边界
 
 - 单机部署
