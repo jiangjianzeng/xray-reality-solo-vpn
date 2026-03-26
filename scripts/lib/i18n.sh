@@ -2,6 +2,9 @@
 
 normalize_lang() {
   case "${1:-en}" in
+    1) printf 'en' ;;
+    2) printf 'zh' ;;
+    3) printf 'ja' ;;
     zh|zh-CN|zh_cn) printf 'zh' ;;
     ja|ja-JP|ja_jp) printf 'ja' ;;
     *) printf 'en' ;;
@@ -24,10 +27,14 @@ select_lang_if_needed() {
   fi
 
   if [[ -t 0 ]]; then
-    local prompt input
-    prompt="Select language / 选择语言 / 言語を選択 [en]: "
-    read -r -p "$prompt" input || true
-    LINEGATE_LANG="$(normalize_lang "${input:-en}")"
+    local input
+    printf '%s\n' "Select language / 选择语言 / 言語を選択:"
+    printf '%s\n' "  1) English"
+    printf '%s\n' "  2) 中文"
+    printf '%s\n' "  3) 日本語"
+    printf '%s' "> [1]: "
+    read -r input || true
+    LINEGATE_LANG="$(normalize_lang "${input:-1}")"
   else
     LINEGATE_LANG="en"
   fi
