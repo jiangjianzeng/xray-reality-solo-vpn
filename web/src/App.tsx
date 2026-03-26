@@ -692,17 +692,6 @@ function DashboardView({
     onError: (error: Error) => onNotifyError(error.message)
   });
 
-  const syncMutation = useMutation({
-    mutationFn: api.syncXray,
-    onSuccess: (payload) => {
-      onNotifySuccess(payload.restart?.message ?? t.notices.syncDone);
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      queryClient.invalidateQueries({ queryKey: ["setup"] });
-    },
-    onError: (error: Error) => onNotifyError(error.message)
-  });
-
   const createMutation = useMutation({
     mutationFn: api.createClient,
     onSuccess: () => {
@@ -796,7 +785,6 @@ function DashboardView({
             <h1 className="mt-1 text-xl font-semibold sm:text-2xl">{t.dashboard.title}</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <LanguageSwitcher language={language} onChange={onLanguageChange} />
             <Badge tone={statusTone(dashboardQuery.data?.status.state ?? summary.serviceState)} className="gap-2">
               <Circle
                 className={cn(
@@ -808,18 +796,6 @@ function DashboardView({
               />
               {dashboardQuery.data?.status.state ?? summary.serviceState}
             </Badge>
-            <Button
-              variant="secondary"
-              onClick={() => syncMutation.mutate()}
-              disabled={syncMutation.isPending || disabled}
-            >
-              {syncMutation.isPending ? (
-                <LoaderCircle className="mr-2 size-4 animate-spin" />
-              ) : (
-                <RefreshCw className="mr-2 size-4" />
-              )}
-              {t.dashboard.syncXray}
-            </Button>
             <div ref={accountMenuRef} className="relative z-40">
               <Button
                 variant="ghost"
@@ -831,26 +807,48 @@ function DashboardView({
                 <ChevronDown className={cn("size-4 transition-transform", accountMenuOpen ? "rotate-180" : "")} />
               </Button>
               {accountMenuOpen ? (
-              <div className="absolute right-0 top-[calc(100%+0.6rem)] z-[80] min-w-44 rounded-xl border border-border/80 bg-card/95 p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.12)] backdrop-blur">
+              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-[80] min-w-64 rounded-2xl border border-border/80 bg-card/95 p-3 shadow-[0_22px_44px_rgba(15,23,42,0.14)] backdrop-blur">
+                <div className="rounded-xl border border-border/70 bg-background/80 p-1">
+                  <div className="grid grid-cols-3 gap-1">
+                    {languageOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        className={cn(
+                          "flex h-9 items-center justify-center rounded-lg px-2 text-sm font-medium transition",
+                          language === option.value
+                            ? "border border-border bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        )}
+                        onClick={() => onLanguageChange(option.value)}
+                      >
+                        <span className="whitespace-nowrap">{option.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="my-3 border-t border-border/70" />
                 <button
                   type="button"
-                  className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium hover:bg-muted"
                   onClick={openPasswordPanel}
                 >
-                  <KeyRound className="mr-2 size-4 text-primary" />
-                  {showPasswordPanel ? t.dashboard.hidePassword : t.dashboard.changePassword}
+                  <KeyRound className="size-4 shrink-0 text-primary" />
+                  <span className="whitespace-nowrap">
+                    {showPasswordPanel ? t.dashboard.hidePassword : t.dashboard.changePassword}
+                  </span>
                 </button>
                 <button
                   type="button"
-                  className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+                  className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium hover:bg-muted"
                   onClick={() => {
                     setAccountMenuOpen(false);
                     logoutMutation.mutate();
                   }}
                   disabled={logoutMutation.isPending || disabled}
                 >
-                  <LogOut className="mr-2 size-4" />
-                  {t.dashboard.logout}
+                  <LogOut className="size-4 shrink-0" />
+                  <span className="whitespace-nowrap">{t.dashboard.logout}</span>
                 </button>
               </div>
               ) : null}
