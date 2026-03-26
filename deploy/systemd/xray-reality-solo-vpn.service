@@ -1,0 +1,17 @@
+[Unit]
+Description=xray-reality-solo-vpn manager
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/xray-reality-solo-vpn/app.env
+WorkingDirectory=/opt/xray-reality-solo-vpn/current
+ExecStart=/opt/xray-reality-solo-vpn/current/bin/manager
+Restart=always
+RestartSec=3
+User=root
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=multi-user.target

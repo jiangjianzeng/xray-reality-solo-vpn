@@ -1,0 +1,12 @@
+{
+	email __ACME_EMAIL__
+}
+
+http://__PANEL_DOMAIN__ {
+	redir https://__PANEL_DOMAIN__{uri}
+}
+
+https://__PANEL_DOMAIN__:8443 {
+	bind 127.0.0.1
+	reverse_proxy 127.0.0.1:3000
+}

@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.omx/
+generated/
+!generated/.gitkeep
+data/
+!data/.gitkeep
+node_modules/
+web/node_modules/
+.gocache/
+.gopath/
+deploy.tgz
+xray-reality-solo-vpn-deploy.tgz

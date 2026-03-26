@@ -1,0 +1,47 @@
+CREATE TABLE IF NOT EXISTS admins (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS clients (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  uuid TEXT NOT NULL UNIQUE,
+  email_tag TEXT NOT NULL UNIQUE,
+  short_id TEXT NOT NULL UNIQUE,
+  subscription_token TEXT NOT NULL UNIQUE,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  last_seen_at TEXT,
+  rx_bytes INTEGER NOT NULL DEFAULT 0,
+  tx_bytes INTEGER NOT NULL DEFAULT 0,
+  rx_bps INTEGER NOT NULL DEFAULT 0,
+  tx_bps INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS service_metrics (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  service_state TEXT NOT NULL DEFAULT 'unknown',
+  total_rx_bytes INTEGER NOT NULL DEFAULT 0,
+  total_tx_bytes INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  admin_id INTEGER NOT NULL,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  last_seen_at TEXT NOT NULL,
+  FOREIGN KEY(admin_id) REFERENCES admins(id) ON DELETE CASCADE
+);

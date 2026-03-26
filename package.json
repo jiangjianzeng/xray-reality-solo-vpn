@@ -1,0 +1,10 @@
+{
+  "name": "xray-reality-solo-vpn",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Workspace scripts for xray-reality-solo-vpn web development.",
+  "scripts": {
+    "web:dev": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build"
+  }
+}

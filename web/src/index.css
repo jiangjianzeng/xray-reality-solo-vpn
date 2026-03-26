@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 160 25% 96%;
+  --foreground: 164 42% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 164 42% 8%;
+  --muted: 160 16% 91%;
+  --muted-foreground: 170 16% 35%;
+  --border: 164 17% 80%;
+  --primary: 170 68% 31%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 39 90% 56%;
+  --accent-foreground: 165 50% 10%;
+  --danger: 2 72% 46%;
+}
+
+* {
+  @apply border-border;
+}
+
+body {
+  @apply min-h-screen bg-background font-sans text-foreground antialiased;
+  background-image:
+    radial-gradient(circle at 10% 20%, hsl(170 68% 31% / 0.14), transparent 38%),
+    radial-gradient(circle at 85% 0%, hsl(39 90% 56% / 0.14), transparent 36%),
+    linear-gradient(145deg, hsl(160 25% 96%), hsl(154 34% 93%));
+}
+
+#root {
+  @apply min-h-screen;
+}
+
+.mesh-overlay {
+  background-image:
+    linear-gradient(hsl(164 17% 80% / 0.22) 1px, transparent 1px),
+    linear-gradient(to right, hsl(164 17% 80% / 0.22) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.scroll-soft::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scroll-soft::-webkit-scrollbar-thumb {
+  background-color: hsl(164 17% 68%);
+  border-radius: 999px;
+}
