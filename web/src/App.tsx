@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-query";
 import {
   Activity,
+  ChevronDown,
+  Circle,
   Copy,
   KeyRound,
   LoaderCircle,
@@ -50,7 +52,6 @@ const statusMismatchMessage: Record<Language, string> = {
 
 const text = {
   en: {
-    language: "Language",
     personalGateway: "Solo VPN",
     consoleTitle: "Solo VPN",
     consoleDescription:
@@ -82,13 +83,16 @@ const text = {
       passwordUpdated: "Password updated",
       passwordEndpointMissing: "The backend has not enabled /api/auth/password yet; the main workflow is unaffected.",
       copiedVless: "Copied VLESS link",
-      copiedSubscription: "Copied subscription URL"
+      copiedSubscription: "Copied Clash subscription URL"
     },
     dashboard: {
       workspace: "Solo VPN",
       title: "Personal Access Console",
       syncXray: "Sync Xray",
       logout: "Sign out",
+      accountMenu: "Account",
+      changePassword: "Change password",
+      hidePassword: "Hide password form",
       xrayStatus: "Xray status",
       totalRx: "Total download",
       totalTx: "Total upload",
@@ -115,9 +119,10 @@ const text = {
       disabled: "Disabled",
       rx: "Download",
       tx: "Upload",
-      rate: "Download rate",
+      downRate: "Download rate",
+      upRate: "Upload rate",
       lastSeen: "Last active",
-      subscription: "Subscription",
+      clash: "Clash",
       resetToken: "Reset token",
       disable: "Disable",
       enable: "Enable",
@@ -125,7 +130,6 @@ const text = {
     }
   },
   zh: {
-    language: "语言",
     personalGateway: "Solo VPN",
     consoleTitle: "Solo VPN",
     consoleDescription: "单机自建安全接入工作台。只保留初始化、登录、客户端管理与运行状态，不做面向公众的共享接入平台或多租户分发系统。",
@@ -156,13 +160,16 @@ const text = {
       passwordUpdated: "密码已更新",
       passwordEndpointMissing: "后端尚未开放 /api/auth/password，主流程不受影响",
       copiedVless: "已复制 VLESS 链接",
-      copiedSubscription: "已复制订阅地址"
+      copiedSubscription: "已复制 Clash 订阅地址"
     },
     dashboard: {
       workspace: "Solo VPN",
       title: "个人接入控制台",
       syncXray: "同步 Xray",
       logout: "退出",
+      accountMenu: "账号",
+      changePassword: "修改密码",
+      hidePassword: "收起密码区",
       xrayStatus: "Xray 状态",
       totalRx: "总下行",
       totalTx: "总上行",
@@ -189,9 +196,10 @@ const text = {
       disabled: "已停用",
       rx: "下行",
       tx: "上行",
-      rate: "下载速率",
+      downRate: "下行速率",
+      upRate: "上行速率",
       lastSeen: "最后活跃",
-      subscription: "订阅",
+      clash: "Clash",
       resetToken: "重置 Token",
       disable: "停用",
       enable: "启用",
@@ -199,7 +207,6 @@ const text = {
     }
   },
   ja: {
-    language: "言語",
     personalGateway: "Solo VPN",
     consoleTitle: "Solo VPN",
     consoleDescription: "単一サーバー向けのセルフホスト型セキュアアクセス管理ワークスペースです。初期化、ログイン、クライアント管理、ランタイム状態に絞っています。",
@@ -230,13 +237,16 @@ const text = {
       passwordUpdated: "パスワードを更新しました",
       passwordEndpointMissing: "バックエンドで /api/auth/password はまだ有効化されていません。主なワークフローには影響しません。",
       copiedVless: "VLESS リンクをコピーしました",
-      copiedSubscription: "サブスクリプション URL をコピーしました"
+      copiedSubscription: "Clash 購読 URL をコピーしました"
     },
     dashboard: {
       workspace: "Solo VPN",
       title: "個人回線コンソール",
       syncXray: "Xray を同期",
       logout: "ログアウト",
+      accountMenu: "アカウント",
+      changePassword: "パスワード変更",
+      hidePassword: "パスワード欄を閉じる",
       xrayStatus: "Xray 状態",
       totalRx: "総ダウンロード",
       totalTx: "総アップロード",
@@ -263,9 +273,10 @@ const text = {
       disabled: "停止中",
       rx: "ダウンロード",
       tx: "アップロード",
-      rate: "ダウンロード速度",
+      downRate: "ダウンロード速度",
+      upRate: "アップロード速度",
       lastSeen: "最終利用",
-      subscription: "購読",
+      clash: "Clash",
       resetToken: "トークン再発行",
       disable: "停止",
       enable: "有効化",
@@ -446,25 +457,20 @@ function LanguageSwitcher({
   language: Language;
   onChange: (language: Language) => void;
 }) {
-  const t = text[language];
-
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs uppercase tracking-[0.12em] text-muted-foreground">{t.language}</span>
-      <div className="flex items-center rounded-xl border border-border/70 bg-background/70 p-1">
-        {languageOptions.map((option) => (
-          <Button
-            key={option.value}
-            type="button"
-            size="sm"
-            variant={language === option.value ? "secondary" : "ghost"}
-            className="h-8 px-2.5"
-            onClick={() => onChange(option.value)}
-          >
-            {option.label}
-          </Button>
-        ))}
-      </div>
+    <div className="flex items-center rounded-xl border border-border/70 bg-background/70 p-1">
+      {languageOptions.map((option) => (
+        <Button
+          key={option.value}
+          type="button"
+          size="sm"
+          variant={language === option.value ? "secondary" : "ghost"}
+          className="h-8 px-2.5"
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </Button>
+      ))}
     </div>
   );
 }
@@ -644,6 +650,8 @@ function DashboardView({
 }: DashboardProps) {
   const queryClient = useQueryClient();
   const t = text[language];
+  const passwordPanelRef = useRef<HTMLDivElement | null>(null);
+  const [showPasswordPanel, setShowPasswordPanel] = useState(false);
   const clientForm = useForm<z.infer<typeof clientSchema>>({
     resolver: zodResolver(clientSchema),
     defaultValues: { name: "" }
@@ -749,6 +757,13 @@ function DashboardView({
 
   const clients = useMemo(() => clientsQuery.data?.clients ?? [], [clientsQuery.data?.clients]);
 
+  function openPasswordPanel() {
+    setShowPasswordPanel(true);
+    requestAnimationFrame(() => {
+      passwordPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 px-3 py-4 sm:px-5 sm:py-6">
       <header className="animate-slide-up rounded-2xl border border-border/70 bg-card/70 p-4 backdrop-blur">
@@ -759,7 +774,15 @@ function DashboardView({
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <LanguageSwitcher language={language} onChange={onLanguageChange} />
-            <Badge tone={statusTone(dashboardQuery.data?.status.state ?? summary.serviceState)}>
+            <Badge tone={statusTone(dashboardQuery.data?.status.state ?? summary.serviceState)} className="gap-2">
+              <Circle
+                className={cn(
+                  "size-2 fill-current stroke-none",
+                  statusTone(dashboardQuery.data?.status.state ?? summary.serviceState) === "success"
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+              />
               {dashboardQuery.data?.status.state ?? summary.serviceState}
             </Badge>
             <Button
@@ -774,14 +797,31 @@ function DashboardView({
               )}
               {t.dashboard.syncXray}
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending || disabled}
-            >
-              <LogOut className="mr-2 size-4" />
-              {t.dashboard.logout}
-            </Button>
+            <div className="group relative">
+              <Button variant="ghost" className="gap-2" disabled={disabled}>
+                {username}
+                <ChevronDown className="size-4" />
+              </Button>
+              <div className="invisible absolute right-0 top-full z-20 mt-2 min-w-40 rounded-xl border border-border/70 bg-card/95 p-1 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                <button
+                  type="button"
+                  className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+                  onClick={openPasswordPanel}
+                >
+                  <KeyRound className="mr-2 size-4 text-primary" />
+                  {showPasswordPanel ? t.dashboard.hidePassword : t.dashboard.changePassword}
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+                  onClick={() => logoutMutation.mutate()}
+                  disabled={logoutMutation.isPending || disabled}
+                >
+                  <LogOut className="mr-2 size-4" />
+                  {t.dashboard.logout}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -863,14 +903,17 @@ function DashboardView({
         </Panel>
       </section>
 
-      <Panel className="animate-slide-up [animation-delay:120ms]">
+      {showPasswordPanel ? (
+      <Panel ref={passwordPanelRef} className="animate-slide-up [animation-delay:120ms]">
         <div className="mb-3 flex items-center gap-2">
           <KeyRound className="size-4 text-primary" />
           <h2 className="text-base font-semibold">{t.dashboard.passwordSettings}</h2>
-          <Badge className="ml-auto">{username}</Badge>
+          <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setShowPasswordPanel(false)}>
+            {t.dashboard.hidePassword}
+          </Button>
         </div>
         <form
-          className="grid gap-3 sm:grid-cols-3"
+          className="grid gap-3 lg:grid-cols-3"
           onSubmit={passwordForm.handleSubmit((values) =>
             passwordMutation.mutate({
               currentPassword: values.currentPassword,
@@ -899,6 +942,7 @@ function DashboardView({
           </div>
         </form>
       </Panel>
+      ) : null}
     </div>
   );
 }
@@ -964,38 +1008,43 @@ function ClientRow({
         <Badge tone={client.enabled ? "success" : "warn"}>{client.enabled ? t.client.enabled : t.client.disabled}</Badge>
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground sm:grid-cols-3 xl:grid-cols-5">
         <p>{t.client.rx}: {client.rxHuman}</p>
         <p>{t.client.tx}: {client.txHuman}</p>
-        <p>{t.client.rate}: {client.rxBpsHuman}</p>
+        <p>{t.client.downRate}: {client.rxBpsHuman}</p>
+        <p>{t.client.upRate}: {client.txBpsHuman}</p>
         <p>{t.client.lastSeen}: {formatLastSeen(client.last_seen_at, language)}</p>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button size="sm" variant="secondary" disabled={busy} onClick={() => copyText(client.shareLink, t.notices.copiedVless)}>
-          <Copy className="mr-1 size-3.5" />
-          VLESS
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled={busy}
-          onClick={() => copyText(client.mihomoSubscriptionUrl, t.notices.copiedSubscription)}
-        >
-          <Copy className="mr-1 size-3.5" />
-          {t.client.subscription}
-        </Button>
-        <Button size="sm" variant="ghost" disabled={busy} onClick={() => onRotate()}>
-          <RefreshCw className="mr-1 size-3.5" />
-          {t.client.resetToken}
-        </Button>
-        <Button size="sm" variant="ghost" disabled={busy} onClick={() => onToggle(!client.enabled)}>
-          {client.enabled ? t.client.disable : t.client.enable}
-        </Button>
-        <Button size="sm" variant="danger" disabled={busy} onClick={() => onDelete()}>
-          <Trash2 className="mr-1 size-3.5" />
-          {t.client.remove}
-        </Button>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="secondary" disabled={busy} onClick={() => copyText(client.shareLink, t.notices.copiedVless)}>
+            <Copy className="mr-1 size-3.5" />
+            VLESS
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={busy}
+            onClick={() => copyText(client.mihomoSubscriptionUrl, t.notices.copiedSubscription)}
+          >
+            <Copy className="mr-1 size-3.5" />
+            {t.client.clash}
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="ghost" disabled={busy} onClick={() => onRotate()}>
+            <RefreshCw className="mr-1 size-3.5" />
+            {t.client.resetToken}
+          </Button>
+          <Button size="sm" variant="ghost" disabled={busy} onClick={() => onToggle(!client.enabled)}>
+            {client.enabled ? t.client.disable : t.client.enable}
+          </Button>
+          <Button size="sm" variant="danger" disabled={busy} onClick={() => onDelete()}>
+            <Trash2 className="mr-1 size-3.5" />
+            {t.client.remove}
+          </Button>
+        </div>
       </div>
     </article>
   );

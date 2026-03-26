@@ -17,6 +17,28 @@ import (
 	"xray-reality-solo-vpn/internal/store"
 )
 
+type statValue int64
+
+func (v *statValue) UnmarshalJSON(data []byte) error {
+	var number int64
+	if err := json.Unmarshal(data, &number); err == nil {
+		*v = statValue(number)
+		return nil
+	}
+
+	var asString string
+	if err := json.Unmarshal(data, &asString); err == nil {
+		var parsed int64
+		if _, err := fmt.Sscan(asString, &parsed); err != nil {
+			return err
+		}
+		*v = statValue(parsed)
+		return nil
+	}
+
+	return fmt.Errorf("unsupported stat value: %s", string(data))
+}
+
 type Manager struct {
 	cfg        *config.Config
 	store      *store.Store
@@ -233,8 +255,8 @@ func (m *Manager) RefreshTrafficStats(ctx context.Context) RefreshResult {
 
 	var parsed struct {
 		Stat []struct {
-			Name  string `json:"name"`
-			Value int64  `json:"value,string"`
+			Name  string    `json:"name"`
+			Value statValue `json:"value"`
 		} `json:"stat"`
 	}
 	if err := json.Unmarshal([]byte(output), &parsed); err != nil {
@@ -253,7 +275,10 @@ func (m *Manager) RefreshTrafficStats(ctx context.Context) RefreshResult {
 		m.stateMu.Lock()
 		previous, ok := m.statsState[client.ID]
 		if !ok {
-			previous = statSnapshot{RXBytes: rxBytes, TXBytes: txBytes, At: now}
+			previous = statSnapshot{RXBytes: client.RXBytes, TXBytes: client.TXBytes, At: now}
+			if parsedAt, err := time.Parse(time.RFC3339, client.UpdatedAt); err == nil && parsedAt.Before(now) {
+				previous.At = parsedAt
+			}
 		}
 		elapsed := now.Sub(previous.At).Seconds()
 		if elapsed < 1 {
@@ -383,12 +408,12 @@ func renderRealityServerConfig(cfg *config.Config, clients []store.Client) map[s
 }
 
 func extractCounter(stats []struct {
-	Name  string `json:"name"`
-	Value int64  `json:"value,string"`
+	Name  string    `json:"name"`
+	Value statValue `json:"value"`
 }, name string) int64 {
 	for _, item := range stats {
 		if item.Name == name {
-			return item.Value
+			return int64(item.Value)
 		}
 	}
 	return 0

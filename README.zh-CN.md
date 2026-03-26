@@ -87,6 +87,17 @@
 
 不要依赖目标服务器在部署时补构建缺失的前端或后端产物。
 
+## 已有安装的更新方式
+
+如果服务器上的现有安装就是从这个仓库部署出来的，推荐更新方式为：
+
+```bash
+git pull
+systemctl restart xray-reality-solo-vpn
+```
+
+如果这次更新还涉及 Xray 运行时行为或部署模板变化，请在重启 manager 之后按需重启相关服务。
+
 ## 宿主机服务
 
 - `xray-reality-solo-vpn.service`

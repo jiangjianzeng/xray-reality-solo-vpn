@@ -89,6 +89,19 @@ The intended deployment flow is:
 
 Do not rely on the target server to build missing frontend or backend artifacts during deployment.
 
+## Update Existing Install
+
+For an existing host installation deployed from this repository, the intended
+update flow is:
+
+```bash
+git pull
+systemctl restart xray-reality-solo-vpn
+```
+
+If the update also changes Xray runtime behavior or deployment templates,
+restart the related services as needed after the manager restart.
+
 ## Host Services
 
 - `xray-reality-solo-vpn.service`
