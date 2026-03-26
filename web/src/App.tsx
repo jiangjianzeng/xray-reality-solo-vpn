@@ -789,7 +789,7 @@ function DashboardView({
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-4 px-3 py-4 sm:px-5 sm:py-6">
-      <header className="animate-slide-up rounded-2xl border border-border/70 bg-card/70 p-4 backdrop-blur">
+      <header className="animate-slide-up relative z-30 overflow-visible rounded-2xl border border-border/70 bg-card/70 p-4 backdrop-blur">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{t.dashboard.workspace}</p>
@@ -820,7 +820,7 @@ function DashboardView({
               )}
               {t.dashboard.syncXray}
             </Button>
-            <div ref={accountMenuRef} className="relative">
+            <div ref={accountMenuRef} className="relative z-40">
               <Button
                 variant="ghost"
                 className="gap-2"
@@ -831,7 +831,7 @@ function DashboardView({
                 <ChevronDown className={cn("size-4 transition-transform", accountMenuOpen ? "rotate-180" : "")} />
               </Button>
               {accountMenuOpen ? (
-              <div className="absolute right-0 top-[calc(100%+0.6rem)] z-50 min-w-44 rounded-xl border border-border/80 bg-card/95 p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.12)] backdrop-blur">
+              <div className="absolute right-0 top-[calc(100%+0.6rem)] z-[80] min-w-44 rounded-xl border border-border/80 bg-card/95 p-1.5 shadow-[0_18px_40px_rgba(15,23,42,0.12)] backdrop-blur">
                 <button
                   type="button"
                   className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
