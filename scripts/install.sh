@@ -36,6 +36,20 @@ prompt_required() {
   printf '%s' "$value"
 }
 
+detect_public_ip() {
+  local value=""
+
+  value="$(curl -4fsS --max-time 5 https://api.ipify.org 2>/dev/null || true)"
+  if [[ -z "$value" ]]; then
+    value="$(curl -4fsS --max-time 5 https://ifconfig.me/ip 2>/dev/null || true)"
+  fi
+  if [[ -z "$value" ]]; then
+    value="$(curl -4fsS --max-time 5 https://icanhazip.com 2>/dev/null | tr -d '\r\n' || true)"
+  fi
+
+  printf '%s' "$value"
+}
+
 if ! "${ROOT_DIR}/scripts/check.sh"; then
   if [[ "$FORCE_CLEAN" -eq 1 ]]; then
     "${ROOT_DIR}/scripts/cleanup.sh"
@@ -74,7 +88,11 @@ fi
 
 PANEL_DOMAIN="$(prompt_required PANEL_DOMAIN "$(translate install_panel_domain)")"
 LINE_DOMAIN="$(prompt_required LINE_DOMAIN "$(translate install_line_domain)")"
-LINE_SERVER_ADDRESS="$(prompt_required LINE_SERVER_ADDRESS "$(translate install_line_server_address)" "$LINE_DOMAIN")"
+LINE_SERVER_ADDRESS_DEFAULT="$(detect_public_ip)"
+if [[ -z "${LINE_SERVER_ADDRESS_DEFAULT}" ]]; then
+  LINE_SERVER_ADDRESS_DEFAULT="$LINE_DOMAIN"
+fi
+LINE_SERVER_ADDRESS="$(prompt_required LINE_SERVER_ADDRESS "$(translate install_line_server_address)" "$LINE_SERVER_ADDRESS_DEFAULT")"
 XRAY_REALITY_TARGET="$(prompt_required XRAY_REALITY_TARGET "$(translate install_reality_target)" 'www.cloudflare.com:443')"
 ACME_EMAIL="$(prompt_required ACME_EMAIL "$(translate install_acme_email)")"
 SETUP_TTL_MINUTES="$(prompt_required SETUP_TTL_MINUTES "$(translate install_setup_ttl)" '30')"
